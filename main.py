@@ -46,13 +46,18 @@ class FileExtensionRemover(Tool):
     def request_remove_ext(self):
         # Import calibre/src/calibre/gui2/tweak_book/file_list.py
         from calibre.gui2.tweak_book.file_list import FileList
-        remove_extension = FileList()
-        names = remove_extension.selected_names
-        print(names)
-        if names is not None:
-            def change_name(name):
-                base = posixpath.splitext(name)[0]
-                return base
-            name_map = {n:change_name(n) for n in names}
-            remove_extension.bulk_rename_requested.emit(name_map)
-            print(name_map)
+        self.boss.add_savepoint('Before: File Extension Remover')
+        name = self.gui.file_list.current_name
+        name_without_ext = posixpath.splitext(name)[0]
+        print(name)
+        print(name_without_ext)
+        # if names is not None:
+        #     def change_name(name):
+        #         base = posixpath.splitext(name)[0]
+        #         return base
+        #     name_map = {n:change_name(n) for n in names}
+        self.boss.rename_requested(name,name_without_ext)
+        # self.boss.rename_done
+        # self.boss.add_savepoint('After: File Extension Remover')
+            # self.boss.refresh_file_list()
+            # self.boss.apply_container_update_to_gui()
