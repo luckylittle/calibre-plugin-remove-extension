@@ -9,13 +9,13 @@ from __future__ import (unicode_literals, division, absolute_import,
 __license__ = 'GPL v3'
 __copyright__ = '2018, Lucian Maly'
 
+# Standard libraries
 import os
 import posixpath
-from PyQt5.Qt import (
-    QAction, QIcon, QInputDialog, QLabel, QLineEdit, QListWidget, QListWidgetItem, QMenu, QPainter,
-    QPixmap, QRadioButton, QScrollArea, QSize, QSpinBox, QStyle, QStyledItemDelegate,
-    Qt, QTimer, QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget, pyqtSignal
-)
+
+# PyQt libraries
+from PyQt5.Qt import QTextEdit, QDockWidget, QApplication, QAction, QFileDialog, QMessageBox, QDialog, QListWidget, QVBoxLayout, QListWidgetItem, QDialogButtonBox, Qt, QTreeWidget
+from PyQt5 import QtCore, QtGui
 
 # The base class that all tools must inherit from
 from calibre.gui2.tweak_book.plugin import Tool
@@ -46,18 +46,14 @@ class FileExtensionRemover(Tool):
     def request_remove_ext(self):
         # Import calibre/src/calibre/gui2/tweak_book/file_list.py
         from calibre.gui2.tweak_book.file_list import FileList
+        # Create a checkpoint before the action
         self.boss.add_savepoint('Before: File Extension Remover')
-        name = self.gui.file_list.current_name
-        name_without_ext = posixpath.splitext(name)[0]
-        print(name)
-        print(name_without_ext)
-        # if names is not None:
-        #     def change_name(name):
-        #         base = posixpath.splitext(name)[0]
-        #         return base
-        #     name_map = {n:change_name(n) for n in names}
-        self.boss.rename_requested(name,name_without_ext)
-        # self.boss.rename_done
-        # self.boss.add_savepoint('After: File Extension Remover')
-            # self.boss.refresh_file_list()
-            # self.boss.apply_container_update_to_gui()
+        # Get list of all selected file names
+        names = self.gui.file_list.file_list.selected_names
+        if names is not None:
+            # Remove the extension
+            def change_name(name):
+                base = posixpath.splitext(name)[0]
+                return base
+            name_map = {n:change_name(n) for n in names}
+            self.boss.bulk_rename_requested(name_map)
