@@ -40,20 +40,36 @@ class FileExtensionRemover(Tool):
             # register it for the action created for the menu, not the toolbar,
             # to avoid a double trigger
             self.register_shortcut(ac, 'file-extension-remover', default_keys=('Ctrl+Shift+Alt+E',))
+        # Kick-off the function
         ac.triggered.connect(self.request_remove_ext)
         return ac
 
     def request_remove_ext(self):
+        """
+        This function removes extension of the files from the file list. This is extremely useful for raw Safari Online exports.
+        """
         # Import calibre/src/calibre/gui2/tweak_book/file_list.py
         from calibre.gui2.tweak_book.file_list import FileList
         # Create a checkpoint before the action
         self.boss.add_savepoint('Before: File Extension Remover')
         # Get list of all selected file names
         names = self.gui.file_list.file_list.selected_names
+            # The list looks like this:
+            # set([u'9781457191435/02_half_title_xhtml.xhtml', 
+            # u'9781457191435/03_full_title_xhtml.xhtml', 
+            # u'9781457191435/01_praise_xhtml.xhtml'])
         if names is not None:
-            # Remove the extension
+            # Remove the extension function
             def change_name(name):
                 base = posixpath.splitext(name)[0]
                 return base
+                    # The base looks like this:
+                    # 9781457191435/02_half_title_xhtml
+                    # 9781457191435/03_full_title_xhtml
+                    # 9781457191435/01_praise_xhtml
             name_map = {n:change_name(n) for n in names}
+                # Name map looks like this:
+                # {u'9781457191435/02_half_title_xhtml.xhtml': u'9781457191435/02_half_title_xhtml', 
+                # u'9781457191435/03_full_title_xhtml.xhtml': u'9781457191435/03_full_title_xhtml', 
+                # u'9781457191435/01_praise_xhtml.xhtml': u'9781457191435/01_praise_xhtml'}
             self.boss.bulk_rename_requested(name_map)
